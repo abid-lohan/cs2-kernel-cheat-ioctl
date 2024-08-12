@@ -1,0 +1,62 @@
+;
+; kernel-mode.inf
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System ; TODO: specify appropriate Class
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider    = %ManufacturerName%
+CatalogFile = kernel-mode.cat
+DriverVer   = ; TODO: set DriverVer in stampinf property pages
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+kernel-mode.sys = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName% = Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+
+[Standard.NT$ARCH$.10.0...16299]
+%kernel-mode.DeviceDesc% = kernel-mode_Device, Root\kernel-mode ; TODO: edit hw-id
+
+[kernel-mode_Device.NT]
+CopyFiles = File_Copy
+
+[File_Copy]
+kernel-mode.sys
+
+;-------------- Service installation
+[kernel-mode_Device.NT.Services]
+AddService = kernel-mode,%SPSVCINST_ASSOCSERVICE%, kernel-mode_Service_Inst
+
+; -------------- kernel-mode driver install sections
+[kernel-mode_Service_Inst]
+DisplayName    = %kernel-mode.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\kernel-mode.sys
+
+[kernel-mode_Device.NT.Wdf]
+KmdfService = kernel-mode, kernel-mode_wdfsect
+
+[kernel-mode_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "kernel-mode Installation Disk"
+kernel-mode.DeviceDesc = "kernel-mode Device"
+kernel-mode.SVCDESC = "kernel-mode Service"
